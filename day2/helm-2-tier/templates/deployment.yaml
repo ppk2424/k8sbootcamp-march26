@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm-2-tier.fullname" . }}
+  labels:
+    {{- include "helm-2-tier.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "helm-2-tier.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helm-2-tier.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: DB_LINK
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "helm-2-tier.fullname" . }}-secret
+              key: db_link
+        - name: FLASK_APP
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "helm-2-tier.fullname" . }}-config
+              key: FLASK_APP

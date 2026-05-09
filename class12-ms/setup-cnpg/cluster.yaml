@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-demo
+  namespace: default
+spec:
+  instances: 3
+
+  postgresql:
+    parameters:
+      max_connections: "200"
+
+  storage:
+    size: 1Gi

@@ -1,0 +1,42 @@
+# Minimal values for studentportal helm chart
+
+replicaCount: 2
+
+image:
+  repository: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/jan26week5-studentportal
+  tag: "1.0"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: ecr-secret
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "256m"
+  limits:
+    memory: "8048Mi"
+    cpu: "500m"
+
+# Container port
+containerPort: 8000
+
+# Service config
+service:
+  type: ClusterIP
+  port: 80
+
+# HPA config
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 30
+
+# ConfigMap data
+config:
+  FLASK_APP: app.py
+
+# Secret data (base64 encoded)
+secret:
+  db_link: cG9zdGdyZXNxbDovL3Bvc3RncmVzOmFkbWluMTIzNEBzdHVkZW50cG9ydGFsLmN2aWs4YWNjdzJ0ay5hcC1zb3V0aC0xLnJkcy5hbWF6b25hd3MuY29tOjU0MzIvcG9zdGdyZXM=

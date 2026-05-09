@@ -1,0 +1,27 @@
+# Normal Way - Direct ArgoCD Application
+# This manifest directly deploys the helm/ecommerce chart
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ecommerce
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/akhileshmishrabiz/k8sbootcamp-march26
+    targetRevision: main
+    path: class12-ms/helm/ecommerce
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ecommerce
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
