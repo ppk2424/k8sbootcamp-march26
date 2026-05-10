@@ -1,7 +1,7 @@
 # Multi-stage build for optimized image size
 
 # Development stage (for local docker-compose)
-FROM node:20-alpine AS development
+FROM node:18-alpine AS development
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ ENTRYPOINT ["dumb-init", "--"]
 CMD ["npm", "run", "dev", "--", "--host"]
 
 # Production build stage
-FROM node:20-alpine AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 

@@ -5,12 +5,14 @@ import (
 	"order-service/config"
 	"order-service/database"
 	"order-service/messaging"
+	"order-service/middleware"
 	"order-service/routes"
 	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -66,6 +68,12 @@ func main() {
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	router.Use(cors.New(corsConfig))
+
+	// Add Prometheus metrics middleware
+	router.Use(middleware.PrometheusMiddleware())
+
+	// Expose /metrics endpoint for Prometheus
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Setup routes
 	routes.SetupRoutes(router, db, rabbitMQ)
