@@ -48,7 +48,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::879381241087:role/eks-github-actions-build-role
-          role-session-name: GitHub_to_AWS_OIDC_EKSDEP
+          role-session-name: GitHub_to_AWS_OIDC_EKSDEP_${{ github.sha }}
           aws-region: ${{ env.AWS_REGION }}
           # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
