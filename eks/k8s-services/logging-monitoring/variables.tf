@@ -12,5 +12,5 @@ variable "domain_name" {
 }
 
 variable "acm_cert_arn" {
-  default = "arn:aws:acm:ap-south-1:879381241087:certificate/44193350-a53b-4e5b-833d-e13e96874b2e"
+  default = "arn:aws:acm:ap-south-1:879381241087:certificate/d7c449d8-1540-4157-8959-bc48bb44b128"
 }

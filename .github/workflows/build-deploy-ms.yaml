@@ -53,6 +53,10 @@ jobs:
             path: apps/frontend/
             values_key: frontend.image
 
+          # - name: seed_data
+          #   ecr_repo: ecommerce-seed-data
+          #   path: seed-job
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -1,0 +1,209 @@
+# Global settings
+global:
+  namespace: ecommerce
+  environment: production
+  imagePullPolicy: IfNotPresent
+  storageClass: gp2
+
+# ECR registry pull config.
+# EKS node IAM role is expected to have AmazonEC2ContainerRegistryReadOnly,
+# so imagePullSecrets are not needed. The ecommerce.image helper composes
+# the full image URL from accountId/region when service `image` is a short name.
+ecr:
+  enabled: true
+  accountId: "879381241087"
+  region: "ap-south-1"
+
+# Redis configuration (password sourced from ESO-managed redis-credentials secret)
+redis:
+  enabled: true
+  image: redis:7-alpine
+  maxMemory: 256mb
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# RabbitMQ configuration (credentials sourced from ESO-managed rabbitmq-credentials secret)
+rabbitmq:
+  enabled: true
+  image: rabbitmq:3.12-management-alpine
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# CloudNativePG database clusters.
+# The CNPG operator itself is installed by infra/cnpg-operator/ terraform.
+# Superuser and app secrets are sourced from ESO-managed `db-credentials`
+# and `db-app-credentials` secrets to avoid hardcoded passwords in this chart.
+cnpg:
+  enabled: true
+  image: ghcr.io/cloudnative-pg/postgresql:15.4
+  instances: 1
+  storage: 1Gi
+  postgresql:
+    max_connections: "100"
+    shared_buffers: "128MB"
+    effective_cache_size: "256MB"
+    work_mem: "4MB"
+    maintenance_work_mem: "64MB"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  monitoring:
+    enablePodMonitor: false
+  databases:
+    - name: products
+    - name: users
+    - name: orders
+    - name: payments
+
+# Microservice deployments.
+# `image` may be a short name (composed with ECR account/region) or a full URI.
+services:
+  productService:
+    enabled: true
+    image: ecommerce-product-service
+    tag: latest
+    port: 8001
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  userService:
+    enabled: true
+    image: ecommerce-user-service
+    tag: latest
+    port: 8002
+    replicas: 1
+    env: production
+    jwtExpiry: "24h"
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  cartService:
+    enabled: true
+    image: ecommerce-cart-service
+    tag: latest
+    port: 8003
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  orderService:
+    enabled: true
+    image: ecommerce-order-service
+    tag: latest
+    port: 8004
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  paymentService:
+    enabled: true
+    image: ecommerce-payment-service
+    tag: latest
+    port: 8005
+    replicas: 1
+    env: production
+    logLevel: INFO
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  notificationService:
+    enabled: true
+    image: ecommerce-notification-service
+    tag: latest
+    port: 8006
+    replicas: 1
+    env: production
+    logLevel: INFO
+    aws:
+      region: ap-south-1
+      sesSenderEmail: noreply@example.com
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+# API Gateway (nginx) - exposed via ALB ingress
+apiGateway:
+  enabled: true
+  image: ecommerce-api-gateway
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Frontend - exposed via ALB ingress
+frontend:
+  enabled: true
+  image: ecommerce-frontend
+  tag: latest
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# ALB ingress for frontend + api-gateway
+ingress:
+  enabled: true
+  className: alb
+  groupName: k8sbatch-shared-alb
+  host: shop.livingdevops.org

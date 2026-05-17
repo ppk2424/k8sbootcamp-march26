@@ -119,7 +119,7 @@ resource "helm_release" "kube_prometheus_grafana_stack" {
         # Grafana service configuration
         service = {
           type = "ClusterIP"
-          port = 8090
+          port = 80
         }
 
         # Disable default datasource creation (we'll use the sidecar)
@@ -172,7 +172,7 @@ resource "helm_release" "kube_prometheus_grafana_stack" {
           server = {
             domain   = "grafana.${var.domain_name}"
             root_url = "https://grafana.${var.domain_name}"
-            serve_from_sub_path = true
+            serve_from_sub_path = false
           }
           analytics = {
             check_for_updates = false
@@ -307,7 +307,7 @@ resource "kubectl_manifest" "grafana_ingress" {
       "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": {\"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
 
       # Group name - all ingresses with the same group share a single ALB
-      "alb.ingress.kubernetes.io/group.name" = "shared-alb"
+      "alb.ingress.kubernetes.io/group.name" = "k8sbatch-shared-alb"
     }
 
       labels = {
@@ -390,7 +390,7 @@ resource "kubectl_manifest" "prometheus_ingress" {
       "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": {\"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
 
       # Group name - all ingresses with the same group share a single ALB
-      "alb.ingress.kubernetes.io/group.name" = "shared-alb"
+      "alb.ingress.kubernetes.io/group.name" = "k8sbatch-shared-alb"
     }
 
       labels = {

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/akhilesh/projects/k8sbootcamp-march26/**)",
+      "Read(//Users/akhilesh/projects/k8sbootcamp-march26/eks/k8s-services/argocd/**)",
+      "Read(//Users/akhilesh/projects/k8sbootcamp-march26/eks/k8s-services/**)"
+    ]
+  }
+}

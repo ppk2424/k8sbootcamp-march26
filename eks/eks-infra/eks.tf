@@ -44,23 +44,23 @@ module "eks" {
     }
   }
 
-  access_entries = {
-    # One access entry with a policy associated
-    example = {
-    principal_arn = "arn:aws:iam::879381241087:user/akhilesh"
-    # principal_arn = "arn:aws:iam::879381241087:role/ec2-admin"
+  # access_entries = {
+  #   # One access entry with a policy associated
+  #   example = {
+  #   principal_arn = "arn:aws:iam::879381241087:user/akhilesh"
+  #   # principal_arn = "arn:aws:iam::879381241087:role/ec2-admin"
 
-      policy_associations = {
-        example = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-          access_scope = {
-            # namespaces = ["default"]
-            type       = "cluster"
-          }
-        }
-      }
-    }
-  }
+  #     policy_associations = {
+  #       example = {
+  #         policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  #         access_scope = {
+  #           # namespaces = ["default"]
+  #           type       = "cluster"
+  #         }
+  #       }
+  #     }
+  #   }
+  # }
 
   tags = {
     Terraform   = "true"

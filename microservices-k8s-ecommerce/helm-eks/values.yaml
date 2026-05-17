@@ -1,0 +1,215 @@
+# Global settings
+global:
+  namespace: ecommerce
+  environment: development
+  imagePullPolicy: IfNotPresent
+  storageClass: gp2
+
+# ECR Configuration
+# When enabled, the ecommerce.image helper builds:
+#   <accountId>.dkr.ecr.<region>.amazonaws.com/<image>:<tag>
+# and pod specs get imagePullSecrets pointing at <secretName>.
+ecr:
+  enabled: true
+  accountId: "879381241087"
+  region: "ap-south-1"
+  secretName: ecr-registry-secret
+
+# Vault configuration
+# Secrets are managed by Vault + External Secrets Operator
+vault:
+  address: "http://vault.vault.svc.cluster.local:8200"
+  secretPath: "secret/data/ecommerce"
+
+# Redis configuration (password from Vault)
+redis:
+  enabled: true
+  image: redis:7-alpine
+  maxMemory: 256mb
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# RabbitMQ configuration (credentials from Vault)
+rabbitmq:
+  enabled: true
+  image: rabbitmq:3.12-management-alpine
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Database credentials for CNPG bootstrap (match Vault secret values)
+database:
+  user: ecommerce_user
+  password: secure_db_password_123
+
+# CloudNativePG Configuration
+cnpg:
+  enabled: true
+  image: ghcr.io/cloudnative-pg/postgresql:15.4
+  instances: 1
+  storage: 1Gi
+  superuserPassword: postgres_superuser_pass_123
+  postgresql:
+    max_connections: "100"
+    shared_buffers: "128MB"
+    effective_cache_size: "256MB"
+    work_mem: "4MB"
+    maintenance_work_mem: "64MB"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  monitoring:
+    enablePodMonitor: false
+  databases:
+    - name: products
+    - name: users
+    - name: orders
+    - name: payments
+
+# Service configurations
+# image/tag are combined with ECR registry via the ecommerce.image helper.
+services:
+  productService:
+    enabled: true
+    image: ecommerce-product-service
+    tag: latest
+    port: 8001
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  userService:
+    enabled: true
+    image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-user-service
+    tag: latest
+    port: 8002
+    replicas: 1
+    env: production
+    jwtExpiry: "24h"
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  cartService:
+    enabled: true
+    image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-cart-service
+    tag: latest
+    port: 8003
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  orderService:
+    enabled: true
+    image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-order-service
+    tag: latest
+    port: 8004
+    replicas: 1
+    env: production
+    logLevel: info
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  paymentService:
+    enabled: true
+    image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-payment-service
+    tag: latest
+    port: 8005
+    replicas: 1
+    env: development
+    logLevel: INFO
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  notificationService:
+    enabled: true
+    image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-notification-service
+    tag: latest
+    port: 8006
+    replicas: 1
+    env: development
+    logLevel: INFO
+    aws:
+      region: ap-south-1
+      sesSenderEmail: noreply@example.com
+      # credentials from Vault (aws-credentials secret)
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+# API Gateway
+apiGateway:
+  enabled: true
+  image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-api-gateway
+  tag: latest
+  replicas: 1
+  nodePort: 30080
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Frontend
+frontend:
+  enabled: true
+  image: 879381241087.dkr.ecr.ap-south-1.amazonaws.com/ecommerce-frontend
+  tag: latest
+  replicas: 1
+  nodePort: 30000
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

@@ -1,5 +1,4 @@
 terraform {
-
   required_version = "1.12.1"
   required_providers {
     aws = {
@@ -14,15 +13,11 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.1"
     }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.14.0"
-    }
   }
 
   backend "s3" {
     bucket       = "state-bucket-879381241087"
-    key          = "k8sbootcamp-march26/eks/eks-services-monitoring/terraform.tfstate"
+    key          = "k8sbootcamp-march26/eks-microservice-implementation/cnpg-operator/terraform.tfstate"
     region       = "ap-south-1"
     encrypt      = true
     use_lockfile = true

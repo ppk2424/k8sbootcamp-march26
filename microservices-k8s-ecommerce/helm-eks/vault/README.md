@@ -210,12 +210,3 @@ kubectl annotate externalsecret <name> -n ecommerce force-sync=$(date +%s) --ove
 # Decode K8s secret
 kubectl get secret db-credentials -n ecommerce -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d
 ```
-
-
-```bash
-helm install vault hashicorp/vault \
-        -n vault \
-        -f  helm-cnpg-vault/vault/vault-values.yaml \
-        --wait \
-        --timeout 5m
-```
