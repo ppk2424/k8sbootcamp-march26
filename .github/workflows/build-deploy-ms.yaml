@@ -8,6 +8,7 @@ on:
 env:
   AWS_REGION: ap-south-1
   ECR_REGISTRY: 879381241087.dkr.ecr.ap-south-1.amazonaws.com
+  core_path: eks-microservice-implementation
 
 jobs:
   build-and-push:
@@ -53,9 +54,9 @@ jobs:
             path: apps/frontend/
             values_key: frontend.image
 
-          # - name: seed_data
-          #   ecr_repo: ecommerce-seed-data
-          #   path: seed-job
+          - name: seed_data
+            ecr_repo: ecommerce-seed
+            path: seed-job
 
     steps:
       - name: Checkout code
@@ -83,7 +84,7 @@ jobs:
       - name: Build ${{ matrix.service.name }}
         uses: docker/build-push-action@v5
         with:
-          context: microservices-k8s-ecommerce/${{ matrix.service.path }}
+          context: ${{ env.core_path }}/${{ matrix.service.path }}
           push: false
           load: true
           tags: |
