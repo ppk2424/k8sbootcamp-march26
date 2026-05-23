@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      repo = "k8sbootcamp-march26/k8s-3-tier-app"
+      repo = "k8sbootcamp-march26"
     }
   }
 }
