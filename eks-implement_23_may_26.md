@@ -105,5 +105,7 @@ terraform apply --auto-approve
 cd eks-microservice-implementation
 cd infra/vault-secrets 
 
+terraform apply --auto-approve
+
 
 ```
