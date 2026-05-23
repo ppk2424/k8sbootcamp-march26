@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REGISTRY: 879381241087.dkr.ecr.ap-south-1.amazonaws.com
+  ECR_REGISTRY: 827327671460.dkr.ecr.ap-south-1.amazonaws.com
   core_path: eks-microservice-implementation
 
 jobs:
@@ -69,14 +69,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           #### if using aws access keys and secrets
-          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
           #### if using aws role to assume - OIDC
-          role-to-assume: arn:aws:iam::879381241087:role/aws-github-oidc-march26
-          role-session-name: GitHub_to_AWS_${{ matrix.service.name }}
-          aws-region: ${{ env.AWS_REGION }}
+          # role-to-assume: arn:aws:iam::879381241087:role/aws-github-oidc-march26
+          # role-session-name: GitHub_to_AWS_${{ matrix.service.name }}
+          # aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
