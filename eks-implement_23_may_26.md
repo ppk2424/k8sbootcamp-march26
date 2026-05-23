@@ -73,3 +73,37 @@ cd eks/k8s-services/argocd
 terraform init
 terraform apply
 ```
+
+# logging/monitoring
+``` bash
+cd eks/k8s-services/logging-monitoring
+# update versions ,providers and 
+terraform apply
+```
+
+# vault 
+```bash
+
+cd eks/k8s-services/vault-eso
+terraform apply
+
+```
+
+# now the app related stuff deployment
+
+# CNPG operators
+```bash 
+
+cd eks-microservice-implementation
+cd infra/cnpg-operator
+terraform apply --auto-approve
+```
+
+# vault-secrets
+
+```bash
+cd eks-microservice-implementation
+cd infra/vault-secrets 
+
+
+```

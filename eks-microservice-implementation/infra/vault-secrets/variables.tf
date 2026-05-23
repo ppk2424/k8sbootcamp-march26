@@ -64,11 +64,11 @@ variable "razorpay_webhook_secret" {
 }
 
 variable "aws_access_key_id" {
-  default   = "AKIAIOSFODNN7EXAMPLE"
+  default   = "AKIAIOSFODNN7MPLE"
   sensitive = true
 }
 
 variable "aws_secret_access_key" {
-  default   = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  default   = "wJalrasaasnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
   sensitive = true
 }
