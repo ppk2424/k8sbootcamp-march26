@@ -28,7 +28,7 @@ variable "vault_in_cluster_addr" {
 variable "enable_eso_secrets" {
   description = "When true, also create the ClusterSecretStore + ExternalSecrets that bind ESO to Vault and materialise K8s secrets in the ecommerce namespace. ESO CRDs and the ecommerce namespace must already exist."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "ecommerce_namespace" {

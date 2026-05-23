@@ -57,7 +57,8 @@ resource "kubectl_manifest" "nodepool_default" {
             {
               key      = "karpenter.sh/capacity-type"
               operator = "In"
-              values   = ["spot", "on-demand"]
+              # values   = ["spot", "on-demand"]
+              values   = ["on-demand"]
             },
             {
               key      = "kubernetes.io/arch"
