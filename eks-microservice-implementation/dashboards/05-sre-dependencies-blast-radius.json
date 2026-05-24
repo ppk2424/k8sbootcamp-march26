@@ -1,0 +1,403 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Shared infrastructure: Redis, RabbitMQ, CNPG \u2014 cascading failure patterns.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "title": "SRE Overview",
+      "url": "/d/sre-overview",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Golden Signals (RED)",
+      "url": "/d/sre-golden-signals",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "USE Method (K8s)",
+      "url": "/d/sre-use-kubernetes",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "SLO & Error Budget",
+      "url": "/d/sre-slo-error-budget",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Alerting & Incidents",
+      "url": "/d/sre-alerting",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Dependencies",
+      "url": "/d/sre-dependencies",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Business SLIs",
+      "url": "/d/sre-business-slis",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sre",
+    "teaching",
+    "dependencies",
+    "cascade"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SRE Teaching \u2014 Dependencies & Blast Radius",
+  "uid": "sre-dependencies",
+  "version": 1,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## Dependencies & Cascading Failures\n\nMicroservices share fate through **shared dependencies**. One Redis outage can break cart-service \u2192 order-service \u2192 payment flow.\n\n**Blast radius:** Map which services fail when a dependency fails.\n\n| Dependency | If down | Affected services |\n|------------|---------|-------------------|\n| Redis | Cart can't store items | cart-service, order-service (checkout) |\n| RabbitMQ | Events not delivered | order-service, notification-service |\n| CNPG Postgres | Data unavailable | product, user, order, payment |\n| product-service | Catalog/stock unknown | cart, order, api-gateway |\n\n**Exercise:** Simulate Redis failure (`kubectl scale deploy redis -n ecommerce --replicas=0`). Watch error rate propagate upstream on RED dashboard.\n"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Redis ready",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "kube_pod_status_ready{namespace=\"ecommerce\",pod=~\"redis-.*\",condition=\"true\"}",
+          "legendFormat": "Redis ready",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "RabbitMQ ready",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "kube_pod_status_ready{namespace=\"ecommerce\",pod=~\"rabbitmq-.*\",condition=\"true\"}",
+          "legendFormat": "RabbitMQ ready",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "CNPG clusters ready",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "count(cnpg_collector_up{namespace=\"ecommerce\"} == 1) or vector(0)",
+          "legendFormat": "CNPG clusters ready",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Postgres connections (all)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(database_connections_active{namespace=\"ecommerce\"}) or vector(0)",
+          "legendFormat": "Postgres connections (all)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "DB query latency p95 by service",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, service) (rate(database_query_duration_seconds_bucket{namespace=\"ecommerce\"}[5m])))",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP errors \u2014 cart vs order (cascade indicator)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "ecommerce:http_error_rate:5m{service=~\"cart-service|order-service|payment-service\"}",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CNPG \u2014 collector up per cluster",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "cnpg_collector_up{namespace=\"ecommerce\"}",
+          "legendFormat": "{{cluster}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "RabbitMQ / Redis pod restarts",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"ecommerce\",pod=~\"redis-.*|rabbitmq-.*\"}[15m])",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

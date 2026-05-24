@@ -1,0 +1,309 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Curriculum map for Site Reliability Engineering concepts on the ecommerce EKS platform.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "title": "SRE Overview",
+      "url": "/d/sre-overview",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Golden Signals (RED)",
+      "url": "/d/sre-golden-signals",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "USE Method (K8s)",
+      "url": "/d/sre-use-kubernetes",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "SLO & Error Budget",
+      "url": "/d/sre-slo-error-budget",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Alerting & Incidents",
+      "url": "/d/sre-alerting",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Dependencies",
+      "url": "/d/sre-dependencies",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Business SLIs",
+      "url": "/d/sre-business-slis",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sre",
+    "teaching",
+    "ecommerce"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SRE Teaching \u2014 Overview",
+  "uid": "sre-overview",
+  "version": 1,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "# Site Reliability Engineering \u2014 Dashboard Curriculum\n\nThis folder teaches core SRE ideas using **live data** from the ecommerce microservices on EKS.\n\n| Dashboard | SRE concept | What you learn |\n|-----------|-------------|----------------|\n| **Golden Signals (RED)** | Rate, Errors, Duration | User-facing service health \u2014 the minimum set every on-call engineer needs |\n| **USE Method (K8s)** | Utilization, Saturation, Errors | Infrastructure capacity \u2014 when the *platform* is the bottleneck |\n| **SLO & Error Budget** | SLI, SLO, error budget, burn rate | Reliability targets and how much failure you can afford |\n| **Alerting & Incidents** | Symptom-based alerts, severity | What is firing right now and how alerts map to user pain |\n| **Dependencies** | Blast radius, cascading failure | Redis, RabbitMQ, Postgres \u2014 shared fate between services |\n| **Business SLIs** | User-journey metrics | Orders and payments \u2014 reliability from the customer's perspective |\n\n**Golden rule:** Measure symptoms (what users feel), alert on symptoms, then use logs/traces/metrics to find causes.\n\n**Deploy:** `terraform apply` in `infra/observability/` or import JSON from Grafana UI \u2192 Dashboards \u2192 Import.\n"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Services Up (ecommerce)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(up{namespace=\"ecommerce\"} == 1)",
+          "legendFormat": "Services Up (ecommerce)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Request rate (req/s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(ecommerce:http_request_rate:5m)",
+          "legendFormat": "Request rate (req/s)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "5xx error rate",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "avg(ecommerce:http_error_rate:5m)",
+          "legendFormat": "5xx error rate",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Firing alerts",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "Firing alerts",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Platform snapshot \u2014 request rate by service",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "ecommerce:http_request_rate:5m{namespace=\"ecommerce\"}",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

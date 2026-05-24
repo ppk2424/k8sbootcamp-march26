@@ -27,8 +27,12 @@ func Connect(cfg *config.Config) *gorm.DB {
 
 	// Retry connection up to 5 times
 	for i := 0; i < 5; i++ {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
+		db, err = gorm.Open(postgres.New(postgres.Config{
+			DSN:                  dsn,
+			PreferSimpleProtocol: true,
+		}), &gorm.Config{
+			Logger:      logger.Default.LogMode(logger.Info),
+			PrepareStmt: false,
 		})
 
 		if err == nil {
@@ -59,6 +63,11 @@ func Connect(cfg *config.Config) *gorm.DB {
 
 func Migrate(db *gorm.DB) {
 	log.Info("Running database migrations...")
+
+	if db.Migrator().HasTable(&models.Product{}) {
+		log.Info("Products schema already exists, skipping migration")
+		return
+	}
 
 	err := db.AutoMigrate(
 		&models.Product{},

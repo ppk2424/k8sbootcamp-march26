@@ -70,15 +70,29 @@ resource "kubectl_manifest" "nodepool_default" {
               operator = "In"
               values   = ["linux"]
             },
+            # Previous: c/m/r compute-optimized / general / memory instances (e.g. c6a.large)
+            # {
+            #   key      = "karpenter.k8s.aws/instance-category"
+            #   operator = "In"
+            #   values   = ["c", "m", "r"]
+            # },
+            # {
+            #   key      = "karpenter.k8s.aws/instance-generation"
+            #   operator = "Gt"
+            #   values   = ["2"]
+            # },
+            # Match the EKS managed node group — burstable t3 (same as eks-infra/eks.tf)
             {
-              key      = "karpenter.k8s.aws/instance-category"
+              key      = "karpenter.k8s.aws/instance-family"
               operator = "In"
-              values   = ["c", "m", "r"]
+              values   = ["t3"]
             },
+            # t3.small caps at 11 pods and ~2 GiB allocatable memory — too tight for
+            # Prometheus (1 Gi request), Grafana, and ecommerce workloads. Require medium+.
             {
-              key      = "karpenter.k8s.aws/instance-generation"
-              operator = "Gt"
-              values   = ["2"]
+              key      = "karpenter.k8s.aws/instance-size"
+              operator = "NotIn"
+              values   = ["nano", "micro", "small"]
             },
           ]
           expireAfter = "720h"

@@ -148,6 +148,10 @@ terraform -chdir=../eks/eks-infra destroy
 
 ## See also
 
+- `docs/DEPLOYMENT-SEQUENCE.md` — full deploy order (eks-infra → k8s-services → vault → cnpg → CI → helm)
+- `docs/SERVICE-DEPENDENCIES.md` — platform and service dependency chain
+- `docs/SERVICE-MAP.md` — per-service and platform component map
+- `dashboards/README.md` — SRE teaching Grafana dashboards (RED, USE, SLO, alerts)
 - `apps/seed-job/readme.md` — seed job details (image, ECR creds, env vars)
 - `apps/services/*/README.md` — per-service docs (where present)
 - `infra/README.md` — detailed CNPG + Vault secret rotation flow

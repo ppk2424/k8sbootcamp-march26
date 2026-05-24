@@ -31,7 +31,8 @@ func Connect(cfg *config.Config) *gorm.DB {
 			DSN:                  dsn,
 			PreferSimpleProtocol: true,
 		}), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
+			Logger:      logger.Default.LogMode(logger.Info),
+			PrepareStmt: false,
 		})
 
 		if err == nil {
@@ -61,6 +62,11 @@ func Connect(cfg *config.Config) *gorm.DB {
 
 func Migrate(db *gorm.DB) {
 	log.Info("Running database migrations...")
+
+	if db.Migrator().HasTable(&models.Order{}) {
+		log.Info("Orders schema already exists, skipping migration")
+		return
+	}
 
 	err := db.AutoMigrate(
 		&models.Order{},

@@ -101,51 +101,39 @@ jobs:
     outputs:
       image_tag: ${{ github.sha }}
 
-  # update-helm-values:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push
-  #   permissions:
-  #     contents: write
+  update-helm-values:
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  permissions:
+    contents: write
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  #     - name: Setup yq
-  #       uses: mikefarah/yq@master
+    - name: Setup yq
+      uses: mikefarah/yq@v4.44.3
 
-  #     - name: Update Helm values with new image tags
-  #       run: |
-  #         IMAGE_TAG="${{ github.sha }}"
-  #         VALUES_FILE="helm/ecommerce/values.yaml"
+    - name: Update Helm values with new image tags
+      run: |
+        IMAGE_TAG="${{ github.sha }}"
+        VALUES_FILE="eks-microservice-implementation/helm-ecommerce/values.yaml"
 
-  #         # Update service images
-  #         yq -i '.services.productService.image = "${{ env.ECR_REGISTRY }}/ecommerce-product-service:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.services.userService.image = "${{ env.ECR_REGISTRY }}/ecommerce-user-service:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.services.cartService.image = "${{ env.ECR_REGISTRY }}/ecommerce-cart-service:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.services.orderService.image = "${{ env.ECR_REGISTRY }}/ecommerce-order-service:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.services.paymentService.image = "${{ env.ECR_REGISTRY }}/ecommerce-payment-service:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.services.notificationService.image = "${{ env.ECR_REGISTRY }}/ecommerce-notification-service:'${IMAGE_TAG}'"' $VALUES_FILE
+        yq -i '.services.productService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-product-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.services.userService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-user-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.services.cartService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-cart-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.services.orderService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-order-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.services.paymentService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-payment-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.services.notificationService.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-notification-service:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.apiGateway.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-api-gateway:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.frontend.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-frontend:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.seedJob.image = "'"${{ env.ECR_REGISTRY }}/ecommerce-seed:${IMAGE_TAG}"'"' $VALUES_FILE
+        yq -i '.global.imagePullPolicy = "IfNotPresent"' $VALUES_FILE
 
-  #         # Update gateway and frontend images
-  #         yq -i '.apiGateway.image = "${{ env.ECR_REGISTRY }}/ecommerce-api-gateway:'${IMAGE_TAG}'"' $VALUES_FILE
-  #         yq -i '.frontend.image = "${{ env.ECR_REGISTRY }}/ecommerce-frontend:'${IMAGE_TAG}'"' $VALUES_FILE
-
-  #         # Update imagePullPolicy for production
-  #         yq -i '.global.imagePullPolicy = "IfNotPresent"' $VALUES_FILE
-
-  #         echo "Updated values.yaml:"
-  #         cat $VALUES_FILE
-
-  #     - name: Commit and push changes
-  #       run: |
-  #         git config --global user.name "github-actions[bot]"
-  #         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-  #         git add helm/ecommerce/values.yaml
-  #         git commit -m "chore: update image tags to ${{ github.sha }}" || echo "No changes to commit"
-  #         git push
-
- 
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add eks-microservice-implementation/helm-ecommerce/values.yaml
+        git commit -m "chore: update image tags to ${{ github.sha }}" || echo "No changes"
+        git push 

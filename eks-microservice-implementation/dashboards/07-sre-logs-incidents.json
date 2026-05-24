@@ -1,0 +1,194 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Structured log exploration during incidents \u2014 correlate with metrics.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "title": "SRE Overview",
+      "url": "/d/sre-overview",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Golden Signals (RED)",
+      "url": "/d/sre-golden-signals",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "USE Method (K8s)",
+      "url": "/d/sre-use-kubernetes",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "SLO & Error Budget",
+      "url": "/d/sre-slo-error-budget",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Alerting & Incidents",
+      "url": "/d/sre-alerting",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Dependencies",
+      "url": "/d/sre-dependencies",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Business SLIs",
+      "url": "/d/sre-business-slis",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sre",
+    "teaching",
+    "logs",
+    "loki"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "ecommerce",
+          "value": "ecommerce"
+        },
+        "hide": 0,
+        "label": "namespace",
+        "name": "namespace",
+        "options": [
+          {
+            "text": "ecommerce",
+            "value": "ecommerce"
+          }
+        ],
+        "query": "ecommerce",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": "search",
+        "name": "search",
+        "options": [
+          {
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SRE Teaching \u2014 Logs for Incidents (Loki)",
+  "uid": "sre-logs-incidents",
+  "version": 1,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## Logs in the SRE Toolkit\n\n**Metrics** tell you something is wrong. **Logs** tell you why.\n\nDuring an incident:\n1. Check RED dashboard for *which* service\n2. Filter logs here by `app` label\n3. Search for `error`, `timeout`, `connection refused`, status codes\n\nPromtail ships all container logs to Loki automatically \u2014 no per-app config.\n"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Log volume by app",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "expr": "sum by (app) (count_over_time({namespace=\"$namespace\"} |~ \"(?i)$search\" [1m]))",
+          "legendFormat": "{{app}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error log rate",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "targets": [
+        {
+          "expr": "sum by (app) (count_over_time({namespace=\"$namespace\"} |~ \"(?i)(error|fatal|panic|5[0-9]{2})\" |~ \"(?i)$search\" [1m]))",
+          "legendFormat": "{{app}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Live tail \u2014 ecommerce",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "expr": "{namespace=\"$namespace\"} |~ \"(?i)$search\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

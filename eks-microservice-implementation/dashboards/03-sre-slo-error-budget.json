@@ -1,0 +1,425 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "SLI/SLO concepts, availability target, and error budget consumption.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "title": "SRE Overview",
+      "url": "/d/sre-overview",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Golden Signals (RED)",
+      "url": "/d/sre-golden-signals",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "USE Method (K8s)",
+      "url": "/d/sre-use-kubernetes",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "SLO & Error Budget",
+      "url": "/d/sre-slo-error-budget",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Alerting & Incidents",
+      "url": "/d/sre-alerting",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Dependencies",
+      "url": "/d/sre-dependencies",
+      "type": "link",
+      "icon": "dashboard"
+    },
+    {
+      "title": "Business SLIs",
+      "url": "/d/sre-business-slis",
+      "type": "link",
+      "icon": "dashboard"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "sre",
+    "teaching",
+    "slo",
+    "sli"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SRE Teaching \u2014 SLO & Error Budget",
+  "uid": "sre-slo-error-budget",
+  "version": 1,
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## SLI, SLO, Error Budget\n\n- **SLI** (Indicator) \u2014 A measurable aspect of reliability (e.g. % successful requests)\n- **SLO** (Objective) \u2014 Target for the SLI (e.g. 99.9% availability over 30 days)\n- **Error budget** \u2014 Allowed unreliability: `1 - SLO` (99.9% \u2192 0.1% bad requests)\n\n**Burn rate:** How fast you consume the budget. Fast burn \u2192 page immediately. Slow burn \u2192 ticket.\n\nThis dashboard uses a **99.9% availability SLO** on HTTP success (non-5xx). Adjust targets in panels for your team agreement.\n\n**Exercise:** If availability SLI is 99.95% but SLO is 99.9%, you still have budget. At 99.5%, you've exhausted budget \u2014 freeze features, focus on reliability.\n"
+      }
+    },
+    {
+      "type": "gauge",
+      "title": "Availability SLI (5m window)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.995
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "1 - (\n  sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[5m]))\n  / sum(rate(http_requests_total{namespace=\"ecommerce\"}[5m]))\n)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "SLO target",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "0.999",
+          "legendFormat": "SLO target",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error budget headroom",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "(1 - (\n  sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[5m]))\n  / sum(rate(http_requests_total{namespace=\"ecommerce\"}[5m]))\n)) - 0.999",
+          "legendFormat": "Error budget headroom",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "5xx req/s (budget consumption)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 2
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx req/s (budget consumption)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Availability SLI over time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "1 - (\n  sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[5m]))\n  / sum(rate(http_requests_total{namespace=\"ecommerce\"}[5m]))\n)",
+          "legendFormat": "availability",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency SLI \u2014 % requests under 1s",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_seconds_bucket{namespace=\"ecommerce\",le=\"1\"}[5m]))\n/ sum(rate(http_request_duration_seconds_count{namespace=\"ecommerce\"}[5m]))",
+          "legendFormat": "under 1s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fast burn \u2014 5xx rate (14.4\u00d7 budget burn indicator)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[5m]))\n/ sum(rate(http_requests_total{namespace=\"ecommerce\"}[5m])) / 0.001",
+          "legendFormat": "burn multiplier",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Slow burn \u2014 5xx rate (1h smoothed)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth"
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{namespace=\"ecommerce\",status=~\"5..\"}[1h]))\n/ sum(rate(http_requests_total{namespace=\"ecommerce\"}[1h])) / 0.001",
+          "legendFormat": "1h burn",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "**Multi-window burn alerts** (Google SRE Workbook): Compare short and long windows \u2014 e.g. 5m and 1h \u2014 to catch both sudden incidents and gradual degradation without alert fatigue.\n\nPrometheusRule alerts in `ecommerce-app-rules` implement symptom thresholds: `EcommerceHighErrorRate` (>5% 5xx), `EcommerceHighLatency` (p95 > 1s).\n"
+      }
+    }
+  ]
+}

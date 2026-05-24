@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "prometheusrule_ecommerce" {
             },
             {
               record = "ecommerce:http_error_rate:5m"
-              expr   = "sum by (service) (rate(http_requests_total{namespace=\"${var.ecommerce_namespace}\",status=~\"5..\"}[5m])) / sum by (service) (rate(http_requests_total{namespace=\"${var.ecommerce_namespace}\"}[5m]))"
+              expr   = "(sum by (service) (rate(http_requests_total{namespace=\"${var.ecommerce_namespace}\",status=~\"5..\"}[5m])) or sum by (service) (rate(http_requests_total{namespace=\"${var.ecommerce_namespace}\",status_code=~\"5..\"}[5m]))) / sum by (service) (rate(http_requests_total{namespace=\"${var.ecommerce_namespace}\"}[5m]))"
             },
             {
               record = "ecommerce:http_latency_p95:5m"

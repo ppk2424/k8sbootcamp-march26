@@ -1,11 +1,15 @@
 locals {
   github_repo = [
     { user = "akhileshmishrabiz", repo = "k8s-bootcamp-dec25", branch = "main" },
-    { user = "akhileshmishrabiz", repo = "k8sbootcamp-march26", branch = "main" },
+    { user = "akhileshmishrabiz", repo = "k8sbootcamp-march26", branch = "*" },
   ]
-  # GitHub Actions OIDC subject: repo:OWNER/REPO:ref:refs/heads/BRANCH
+  # branch = "main" -> repo:OWNER/REPO:ref:refs/heads/main
+  # branch = "*"     -> repo:OWNER/REPO:*  (any ref, tag, environment, etc.)
   github_oidc_subjects = distinct([
-    for r in local.github_repo : "repo:${r.user}/${r.repo}:ref:refs/heads/${r.branch}"
+    for r in local.github_repo :
+    r.branch == "*" ?
+    "repo:${r.user}/${r.repo}:*" :
+    "repo:${r.user}/${r.repo}:ref:refs/heads/${r.branch}"
   ])
 }
 

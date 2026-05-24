@@ -6,10 +6,15 @@ App-layer observability wiring: tells the cluster's Prometheus what to scrape, w
 observability/
 ├── podmonitors.tf       # PodMonitor per microservice + api-gateway
 ├── prometheusrules.tf   # Recording rules + alerts (service health, business, deps)
-├── dashboards.tf        # ConfigMaps loading the two JSON dashboards
+├── dashboards.tf        # ConfigMaps loading operational + SRE teaching dashboards
 └── dashboards/
     ├── ecommerce-overview.json   # Service RED (rate, errors, latency p95) + pod CPU/mem
     └── ecommerce-logs.json       # Loki-backed log explorer
+
+../../dashboards/                  # SRE teaching dashboards (8 panels-rich JSON files)
+├── README.md                      # SRE curriculum + deploy instructions
+├── generate.py                    # Regenerate JSON after editing queries/text
+└── 00-sre-overview.json … 07-sre-logs-incidents.json
 ```
 
 ---
@@ -61,14 +66,31 @@ Four rule groups, all scoped to `namespace="ecommerce"`:
 
 Recording rules pre-compute the hot RED queries so the dashboard panels stay snappy even with months of data.
 
-### 3. Grafana dashboards (`dashboards.tf` + `dashboards/*.json`)
+### 3. Grafana dashboards (`dashboards.tf` + `dashboards/*.json` + `../../dashboards/`)
 
 Delivered as ConfigMaps in the `monitoring` namespace with label `grafana_dashboard: "1"`. Grafana's sidecar picks them up automatically — no Grafana restart needed.
+
+**Operational (ecommerce folder):**
 
 | Dashboard | UID | What it shows |
 |-----------|-----|---------------|
 | `Ecommerce — Service RED` | `ecommerce-red` | Up/down stats, request rate, error %, p95 latency, pod CPU/mem, restarts — filterable by `service` |
 | `Ecommerce — Logs (Loki)` | `ecommerce-logs` | Log volume + error-rate over time, live tail, errors-only view — filterable by `namespace`, `app`, free-text `search` |
+
+**SRE teaching (`../../dashboards/` → Grafana folder `sre-teaching`):**
+
+| Dashboard | UID | SRE concept |
+|-----------|-----|-------------|
+| `SRE Teaching — Overview` | `sre-overview` | Curriculum map + live platform snapshot |
+| `SRE Teaching — Golden Signals (RED)` | `sre-golden-signals` | Rate, Errors, Duration |
+| `SRE Teaching — USE Method (Kubernetes)` | `sre-use-kubernetes` | Utilization, Saturation, Errors |
+| `SRE Teaching — SLO & Error Budget` | `sre-slo-error-budget` | SLI/SLO, error budget, burn rate |
+| `SRE Teaching — Alerting & Incident Readiness` | `sre-alerting` | Firing alerts, severity, triage |
+| `SRE Teaching — Dependencies & Blast Radius` | `sre-dependencies` | Redis, RabbitMQ, CNPG cascade |
+| `SRE Teaching — Business SLIs (Ecommerce)` | `sre-business-slis` | Orders, payments, product queries |
+| `SRE Teaching — Logs for Incidents (Loki)` | `sre-logs-incidents` | Log exploration during incidents |
+
+See `../../dashboards/README.md` for the bootcamp learning path and regenerate instructions.
 
 ---
 

@@ -6,7 +6,7 @@ variable "region" {
   default = "ap-south-1"
 }
 
-
+# assume you have oyblich hosted zone configure
 variable "domain_name" {
   default = "livingdevops.org"
 }

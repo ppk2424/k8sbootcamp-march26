@@ -31,6 +31,10 @@ resource "helm_release" "karpenter" {
       name  = "controller.resources.requests.memory"
       value = "256Mi"
     },
+    {
+      name  = "replicas"
+      value = "1"
+    },
   ]
 
   depends_on = [

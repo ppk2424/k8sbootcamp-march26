@@ -52,6 +52,17 @@ data "aws_vpc" "main" {
   }
 }
 
+data "aws_security_group" "node" {
+  filter {
+    name   = "group-name"
+    values = ["${var.cluster_name}-node-*"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+}
+
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
