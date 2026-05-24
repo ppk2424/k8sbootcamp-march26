@@ -148,6 +148,7 @@ terraform -chdir=../eks/eks-infra destroy
 
 ## See also
 
+- `docs/MONITORING.md` — full monitoring guide (Prometheus, Grafana, Loki, alerts, dashboards)
 - `docs/DEPLOYMENT-SEQUENCE.md` — full deploy order (eks-infra → k8s-services → vault → cnpg → CI → helm)
 - `docs/SERVICE-DEPENDENCIES.md` — platform and service dependency chain
 - `docs/SERVICE-MAP.md` — per-service and platform component map

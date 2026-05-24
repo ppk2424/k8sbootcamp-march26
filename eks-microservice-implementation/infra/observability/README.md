@@ -1,6 +1,8 @@
 # Ecommerce Observability
 
-App-layer observability wiring: tells the cluster's Prometheus what to scrape, what to alert on, and gives Grafana two dashboards. Logs already flow into Loki automatically (Promtail is a DaemonSet, no per-app config needed).
+App-layer observability wiring: tells the cluster's Prometheus what to scrape, what to alert on, and delivers Grafana dashboards. Logs flow into Loki automatically (Promtail is a DaemonSet, no per-app config needed).
+
+> **Full guide:** see [`docs/MONITORING.md`](../../docs/MONITORING.md) for architecture, metrics/logs flow, RED method, dashboard catalog, and troubleshooting.
 
 ```
 observability/

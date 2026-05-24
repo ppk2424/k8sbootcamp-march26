@@ -520,6 +520,8 @@ Password: NewPassword123!
 
 Wires Prometheus/Grafana to scrape the ecommerce microservices. Requires step 8 (monitoring stack) and step 16 (running pods).
 
+See **`docs/MONITORING.md`** for the full architecture guide (metrics flow, logs, alerts, dashboards, RED method).
+
 ```bash
 cd ../infra/observability
 terraform init
