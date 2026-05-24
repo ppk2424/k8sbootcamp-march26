@@ -1,12 +1,6 @@
 {{- if .Values.cnpg.enabled }}
 {{- range .Values.cnpg.databases }}
 ---
-# CNPG app user Secret for the {{ .name }} database.
-# Built from the ESO-managed db-credentials Secret via stringData refs at runtime
-# is not supported by CNPG; we materialise per-cluster app secrets here with the
-# values consumed via env-from-secret pattern in service templates instead.
-# This Secret is created empty and populated by ESO using the db-app-credentials
-# ExternalSecret target plus a CNPG bootstrap reference.
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -25,7 +19,7 @@ spec:
       database: {{ .name }}
       owner: ecommerce_user
       secret:
-        name: db-app-credentials
+        name: db-credentials
       postInitApplicationSQL:
         - CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
 

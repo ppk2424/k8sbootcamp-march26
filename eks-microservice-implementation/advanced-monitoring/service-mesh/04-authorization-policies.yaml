@@ -1,0 +1,178 @@
+# L7 authorization — deny-by-default, explicit allow matching the service graph.
+---
+# Deny all traffic in ecommerce unless allowed by a more specific policy.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+    app.kubernetes.io/component: service-mesh
+spec:
+  {}
+---
+# API gateway may call all backend microservices.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: api-gateway-egress
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            ports: ["8001", "8002", "8003", "8004", "8005", "8006"]
+---
+# Product service: accept from api-gateway, cart, order.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: product-service
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: product-service
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["api-gateway", "cart-service", "order-service"]
+      to:
+        - operation:
+            ports: ["8001"]
+---
+# Cart service: api-gateway and order-service only.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: cart-service
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: cart-service
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["api-gateway", "order-service"]
+      to:
+        - operation:
+            ports: ["8003"]
+---
+# Order service: api-gateway and payment-service.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: order-service
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["api-gateway", "payment-service"]
+      to:
+        - operation:
+            ports: ["8004"]
+---
+# Payment service: api-gateway only.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-service
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: payment-service
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["api-gateway"]
+      to:
+        - operation:
+            ports: ["8005"]
+---
+# User service: api-gateway only.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: user-service
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: user-service
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["api-gateway"]
+      to:
+        - operation:
+            ports: ["8002"]
+---
+# Redis: cart-service only.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: redis
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["cart-service"]
+      to:
+        - operation:
+            ports: ["6379"]
+---
+# RabbitMQ: order + notification.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: rabbitmq
+  namespace: ecommerce
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq
+  action: ALLOW
+  rules:
+    - when:
+        - key: source.labels[app]
+          values: ["order-service", "notification-service"]
+      to:
+        - operation:
+            ports: ["5672"]
+---
+# Allow Prometheus to scrape sidecar and app metrics.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-prometheus
+  namespace: ecommerce
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces: ["monitoring"]
+      to:
+        - operation:
+            ports: ["15020", "15090", "8001", "8002", "8003", "8004", "8005", "8006", "80"]

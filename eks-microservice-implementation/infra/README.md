@@ -92,8 +92,7 @@ After Stage 2, ESO produces these K8s secrets in the `ecommerce` namespace:
 
 | Secret | Keys | Vault path |
 |--------|------|------------|
-| `db-credentials` | `POSTGRES_USER`, `POSTGRES_PASSWORD` | `secret/ecommerce/database` |
-| `db-app-credentials` | `username`, `password` (CNPG bootstrap format) | `secret/ecommerce/database` |
+| `db-credentials` | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `username`, `password` | `secret/ecommerce/database` — apps + CNPG bootstrap |
 | `redis-credentials` | `REDIS_PASSWORD` | `secret/ecommerce/redis` |
 | `rabbitmq-credentials` | `RABBITMQ_DEFAULT_USER`, `RABBITMQ_DEFAULT_PASS` | `secret/ecommerce/rabbitmq` |
 | `app-secrets` | `JWT_SECRET`, `RAZORPAY_*` | `secret/ecommerce/app` + `/razorpay` |

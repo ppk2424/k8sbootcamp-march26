@@ -1,0 +1,8 @@
+# Optional label — documents that NetworkPolicy is active in this namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecommerce
+  labels:
+    network-policy/enabled: "true"
+    name: ecommerce

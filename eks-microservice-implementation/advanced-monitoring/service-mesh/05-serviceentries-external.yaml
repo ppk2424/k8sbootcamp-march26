@@ -1,0 +1,37 @@
+# Register external services so Istio sidecars can route HTTPS egress with telemetry.
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: razorpay-api
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+    app.kubernetes.io/component: service-mesh
+spec:
+  hosts:
+    - api.razorpay.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: aws-ses-smtp
+  namespace: ecommerce
+spec:
+  hosts:
+    - email-smtp.ap-south-1.amazonaws.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+    - number: 587
+      name: tls
+      protocol: TLS
+  location: MESH_EXTERNAL
+  resolution: DNS

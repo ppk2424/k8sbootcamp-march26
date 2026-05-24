@@ -1,0 +1,8 @@
+# Enable automatic Istio sidecar injection for all new/ restarted pods.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecommerce
+  labels:
+    istio-injection: enabled
+    app.kubernetes.io/part-of: ecommerce

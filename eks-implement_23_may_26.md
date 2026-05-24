@@ -91,13 +91,6 @@ terraform apply
 
 # now the app related stuff deployment
 
-# CNPG operators
-```bash 
-
-cd eks-microservice-implementation
-cd infra/cnpg-operator
-terraform apply --auto-approve
-```
 
 # vault-secrets
 
@@ -108,4 +101,29 @@ cd infra/vault-secrets
 terraform apply --auto-approve
 
 
+```
+
+
+# CNPG operators
+```bash 
+
+cd eks-microservice-implementation
+cd infra/cnpg-operator
+terraform apply --auto-approve
+```
+
+
+# ARgocd App -> pull helm charts and deploy the app
+```bash 
+
+cd eks-microservice-implementation/argocd
+kubectl apply -f application.yaml
+```
+
+# monitoring dashboards operators
+```bash 
+
+cd eks-microservice-implementation
+cd infra/observability
+terraform apply --auto-approve
 ```

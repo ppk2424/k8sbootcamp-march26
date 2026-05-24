@@ -32,9 +32,8 @@ rabbitmq:
       memory: 512Mi
 
 # CloudNativePG database clusters.
-# The CNPG operator itself is installed by infra/cnpg-operator/ terraform.
-# Superuser and app secrets are sourced from ESO-managed `db-credentials`
-# and `db-app-credentials` secrets to avoid hardcoded passwords in this chart.
+# Bootstrap and microservices both use the single ESO secret `db-credentials`
+# (POSTGRES_* for apps, username/password for CNPG initdb).
 cnpg:
   enabled: true
   image: ghcr.io/cloudnative-pg/postgresql:15.4

@@ -1,0 +1,109 @@
+# Virtual services: timeouts and retries for critical paths.
+---
+# Checkout path: order-service calls cart + product — add retries on transient failures.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: order-service
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+    app.kubernetes.io/component: service-mesh
+spec:
+  hosts:
+    - order-service.ecommerce.svc.cluster.local
+  http:
+    - timeout: 15s
+      retries:
+        attempts: 3
+        perTryTimeout: 5s
+        retryOn: connect-failure,refused-stream,503
+      route:
+        - destination:
+            host: order-service.ecommerce.svc.cluster.local
+---
+# Payment path: longer timeout for Razorpay round-trip.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: payment-service
+  namespace: ecommerce
+spec:
+  hosts:
+    - payment-service.ecommerce.svc.cluster.local
+  http:
+    - timeout: 30s
+      retries:
+        attempts: 2
+        perTryTimeout: 15s
+        retryOn: connect-failure,503
+      route:
+        - destination:
+            host: payment-service.ecommerce.svc.cluster.local
+---
+# Cart → product validation
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cart-to-product
+  namespace: ecommerce
+spec:
+  hosts:
+    - product-service.ecommerce.svc.cluster.local
+  http:
+    - match:
+        - sourceLabels:
+            app: cart-service
+      timeout: 5s
+      retries:
+        attempts: 2
+        perTryTimeout: 2s
+        retryOn: connect-failure,503
+      route:
+        - destination:
+            host: product-service.ecommerce.svc.cluster.local
+---
+# Product service: default timeout for catalog reads.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: product-service
+  namespace: ecommerce
+spec:
+  hosts:
+    - product-service.ecommerce.svc.cluster.local
+  http:
+    - timeout: 10s
+      route:
+        - destination:
+            host: product-service.ecommerce.svc.cluster.local
+---
+# User service
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: user-service
+  namespace: ecommerce
+spec:
+  hosts:
+    - user-service.ecommerce.svc.cluster.local
+  http:
+    - timeout: 10s
+      route:
+        - destination:
+            host: user-service.ecommerce.svc.cluster.local
+---
+# Cart service
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cart-service
+  namespace: ecommerce
+spec:
+  hosts:
+    - cart-service.ecommerce.svc.cluster.local
+  http:
+    - timeout: 10s
+      route:
+        - destination:
+            host: cart-service.ecommerce.svc.cluster.local

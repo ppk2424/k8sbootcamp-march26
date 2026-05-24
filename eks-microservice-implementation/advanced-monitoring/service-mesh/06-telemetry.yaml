@@ -1,0 +1,24 @@
+# Export Istio sidecar metrics to Prometheus (merged with app metrics).
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: ecommerce-prometheus
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+    app.kubernetes.io/component: service-mesh
+spec:
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: ALL_METRICS
+          tagOverrides:
+            destination_service_name:
+              value: "%{DESTINATION_SERVICE_NAME | 'unknown'}"
+            destination_service_namespace:
+              value: "%{DESTINATION_SERVICE_NAMESPACE | 'unknown'}"
+  accessLogging:
+    - providers:
+        - name: envoy

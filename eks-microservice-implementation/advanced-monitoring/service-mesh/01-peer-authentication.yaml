@@ -1,0 +1,14 @@
+# mTLS for the entire ecommerce namespace.
+# Start with PERMISSIVE (accepts plain + TLS) during sidecar rollout.
+# Change to STRICT once all pods show istio-proxy container.
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: ecommerce-default
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+    app.kubernetes.io/component: service-mesh
+spec:
+  mtls:
+    mode: PERMISSIVE

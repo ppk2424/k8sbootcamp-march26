@@ -406,3 +406,4 @@ terraform -chdir=eks/k8s-services/logging-monitoring destroy
 | Standalone Prometheus config (reference) | `apps/monitoring/prometheus/` |
 | SRE dashboard curriculum | `dashboards/README.md` |
 | Terraform module quick reference | `infra/observability/README.md` |
+| NetworkPolicy + Istio service mesh | `advanced-monitoring/` |

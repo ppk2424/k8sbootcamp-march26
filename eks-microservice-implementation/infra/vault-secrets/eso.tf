@@ -4,8 +4,7 @@ locals {
     "db-credentials" = [
       { secretKey = "POSTGRES_USER", key = "secret/data/ecommerce/database", property = "username" },
       { secretKey = "POSTGRES_PASSWORD", key = "secret/data/ecommerce/database", property = "password" },
-    ]
-    "db-app-credentials" = [
+      # CNPG bootstrap.initdb.secret expects username/password keys (same Vault source).
       { secretKey = "username", key = "secret/data/ecommerce/database", property = "username" },
       { secretKey = "password", key = "secret/data/ecommerce/database", property = "password" },
     ]
